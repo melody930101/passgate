@@ -19,11 +19,9 @@
 
 | 状态 | 任务 | 说明 |
 |:----:|------|------|
-| ⬜ | 安装 Nginx | `apt install nginx` 或 `yum install nginx` |
-| ⬜ | 安装 MySQL | 若不自建则跳过 |
-| ⬜ | 安装 Python 3.10+ | 建议 3.10/3.11，避免 bcrypt 与 3.13 兼容问题 |
+| ⬜ | 安装 Docker | `yum install docker` 或 `apt install docker.io`，并启用 `docker compose` |
+| ⬜ | 安装 Nginx | 用于 HTTPS 终止与反向代理 |
 | ⬜ | 设置时区 | 服务器 `TZ=Asia/Shanghai` 或 `timedatectl set-timezone Asia/Shanghai` |
-| ⬜ | MySQL 时区 | 配置 `time_zone='+08:00'` 或 `Asia/Shanghai` |
 | ⬜ | 防火墙放行 | 443（HTTPS）、80（可选）、22（SSH） |
 
 ---
@@ -40,50 +38,39 @@
 
 ---
 
-## 四、数据库
+## 四、数据库（云 MySQL）
 
 | 状态 | 任务 | 说明 |
 |:----:|------|------|
 | ⬜ | 创建数据库 | `CREATE DATABASE passgate CHARACTER SET utf8mb4;` |
-| ⬜ | 执行 init_db | `python -m scripts.init_db`，创建表 + 默认管理员 |
+| ⬜ | 执行 init_db | `docker compose run --rm backend python -m scripts.init_db`，创建表 + 默认管理员 |
 | ⬜ | 验证管理员 | 确认 `admin` / `admin123` 可登录（上线后改密） |
 
 ---
 
-## 五、后端部署
+## 五、Docker 部署（推荐）
 
 | 状态 | 任务 | 说明 |
 |:----:|------|------|
-| ⬜ | 上传代码 | `backend/` 目录上传至服务器 |
-| ⬜ | 创建虚拟环境 | `python3 -m venv venv` |
-| ⬜ | 安装依赖 | `pip install -r requirements.txt`（遇 bcrypt 可装 `bcrypt<5.0`） |
-| ⬜ | 进程管理 | systemd 或 supervisor 管理 uvicorn/gunicorn |
-| ⬜ | 启动命令 | `uvicorn app.main:app --host 0.0.0.0 --port 8000` 或 gunicorn |
+| ⬜ | 安装 Docker | `yum install docker` / `apt install docker.io` + `docker compose` |
+| ⬜ | 配置 backend/.env | DATABASE_URL 指向云 MySQL，SECRET_KEY、TIMEZONE 等 |
+| ⬜ | 初始化数据库 | `docker compose run --rm backend python -m scripts.init_db` |
+| ⬜ | 启动服务 | `docker compose up -d --build` |
+| ⬜ | 验证 | backend:8000、frontend:8080 分别可访问 |
 
 ---
 
-## 六、前端部署
+## 六、Nginx 配置
 
 | 状态 | 任务 | 说明 |
 |:----:|------|------|
-| ⬜ | 构建前端 | `VITE_API_BASE_URL=` 或 `VITE_API_BASE_URL=https://你的域名` 后 `npm run build` |
-| ⬜ | 上传 dist | 将 `frontend/dist/` 上传至服务器（如 `/var/www/passgate/`） |
-| ⬜ | 同域部署 | 前后端同域时可不设 VITE_API_BASE_URL，由 Nginx 代理 /api |
+| ⬜ | 复制配置 | 将 `docs/nginx-ai-melody.conf` 放入 `/etc/nginx/conf.d/passgate.conf` |
+| ⬜ | 证书路径 | 确认 ssl_certificate、ssl_certificate_key 指向实际文件 |
+| ⬜ | 重载 Nginx | `sudo nginx -t && sudo nginx -s reload` |
 
 ---
 
-## 七、Nginx 配置
-
-| 状态 | 任务 | 说明 |
-|:----:|------|------|
-| ⬜ | 静态文件 | root 指向 dist 目录，处理 SPA 路由（try_files） |
-| ⬜ | 反向代理 /api | proxy_pass 到 localhost:8000 |
-| ⬜ | 请求头 | 设置 Host、X-Forwarded-For、X-Forwarded-Proto |
-| ⬜ | 超时 | proxy_read_timeout 等适当调大 |
-
----
-
-## 八、HTTPS 与证书
+## 七、HTTPS 与证书
 
 | 状态 | 任务 | 说明 |
 |:----:|------|------|
@@ -93,18 +80,7 @@
 
 ---
 
-## 九、Docker 化（可选）
-
-| 状态 | 任务 | 说明 |
-|:----:|------|------|
-| ⬜ | Dockerfile 后端 | Python 基础镜像 + 依赖 + uvicorn |
-| ⬜ | Dockerfile 前端 | nginx 镜像 + 构建产物 |
-| ⬜ | docker-compose | 编排 backend、frontend、mysql（可选） |
-| ⬜ | 环境变量注入 | 通过 env_file 或 environment 传入 |
-
----
-
-## 十、上线验证
+## 八、上线验证
 
 | 状态 | 任务 | 说明 |
 |:----:|------|------|
@@ -115,13 +91,29 @@
 
 ---
 
-## 十一、运维与备份
+## 九、运维与备份
 
 | 状态 | 任务 | 说明 |
 |:----:|------|------|
 | ⬜ | 数据库备份 | 定期 mysqldump 或云 RDS 自动备份 |
 | ⬜ | 日志目录 | 记录 Nginx、uvicorn 日志路径 |
 | ⬜ | 监控告警 | 进程存活、磁盘、内存（可选） |
+
+---
+
+## 十、Git 拉取与一键部署
+
+代码已推送到 [GitHub](https://github.com/melody930101/passgate.git)。
+
+### 日常更新流程
+
+```bash
+cd /path/to/passgate
+git pull
+docker compose up -d --build
+```
+
+如需仅重启某一服务：`docker compose up -d --build backend` 或 `frontend`。
 
 ---
 

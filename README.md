@@ -40,8 +40,13 @@ npm run dev
 
 访问 http://localhost:5173
 
-## 部署
+## 部署（Docker）
 
-- 前端：`npm run build` 后将 `dist/` 部署到 Nginx
-- 后端：uvicorn + gunicorn
-- 需 HTTPS（微信内 H5 扫码需 HTTPS）
+```bash
+# 配置 backend/.env（DATABASE_URL 指向云 MySQL）
+docker compose up -d --build
+```
+
+需配合 Nginx 做 HTTPS 终止与反向代理（见 [docs/nginx-ai-melody.conf](docs/nginx-ai-melody.conf)）。
+
+**日常更新**：`git pull` 后执行 `docker compose up -d --build`
