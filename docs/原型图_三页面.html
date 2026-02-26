@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>票务系统原型图</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0f0f14;
+    font-family: 'Noto Sans SC', sans-serif;
+    color: #fff;
+    min-height: 100vh;
+    padding: 40px 20px 60px;
+  }
+
+  h1.page-title {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 48px;
+  }
+
+  .screens-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .screen-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .screen-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #444;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Phone shell */
+  .phone {
+    width: 320px;
+    background: #1a1a22;
+    border-radius: 40px;
+    border: 1.5px solid #2a2a35;
+    box-shadow:
+      0 0 0 6px #111118,
+      0 0 0 8px #222,
+      0 40px 80px rgba(0,0,0,0.8),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Notch */
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 100px; height: 28px;
+    background: #111118;
+    border-radius: 0 0 18px 18px;
+    z-index: 100;
+  }
+
+  .phone-screen {
+    height: 680px;
+    overflow: hidden;
+    background: #f5f5f7;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 44px;
+    background: #fff;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 24px 6px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  .status-time {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+
+  .status-icons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .status-icons span {
+    font-size: 11px;
+    color: #1a1a2e;
+  }
+
+  /* Nav bar */
+  .nav-bar {
+    height: 48px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+  }
+
+  .nav-left, .nav-right {
+    font-size: 13px;
+    color: #E63946;
+    font-weight: 500;
+    min-width: 60px;
+  }
+
+  .nav-right { text-align: right; }
+
+  .nav-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+
+  /* Scroll content */
+  .scroll-content {
+    flex: 1;
+    overflow: hidden;
+    background: #f5f5f7;
+  }
+
+  /* Form section */
+  .form-section {
+    padding: 16px 16px 0;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: block;
+    letter-spacing: 0.5px;
+  }
+
+  .form-input {
+    width: 100%;
+    height: 44px;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e8e8e8;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    font-size: 14px;
+    color: #999;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .form-input.has-value {
+    color: #1a1a2e;
+  }
+
+  .form-input.picker {
+    justify-content: space-between;
+  }
+
+  .picker-arrow {
+    color: #ccc;
+    font-size: 10px;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    margin: 8px 16px 0;
+    height: 48px;
+    background: linear-gradient(135deg, #E63946 0%, #c1121f 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 16px rgba(230, 57, 70, 0.4);
+  }
+
+  /* QR success section */
+  .qr-success {
+    margin: 12px 16px 0;
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .qr-success-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .success-dot {
+    width: 8px; height: 8px;
+    background: #2ecc71;
+    border-radius: 50%;
+  }
+
+  .success-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #2ecc71;
+  }
+
+  .ticket-info {
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+
+  .ticket-info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .ticket-info-row:last-child { margin-bottom: 0; }
+
+  .info-key { color: #999; }
+  .info-val { color: #1a1a2e; font-weight: 500; }
+
+  .qr-image-area {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  .qr-mock {
+    width: 90px; height: 90px;
+    background: #1a1a2e;
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(9, 1fr);
+    gap: 1px;
+    padding: 6px;
+  }
+
+  .qr-mock-cell {
+    background: #f5f5f7;
+    border-radius: 1px;
+  }
+
+  .qr-mock-cell.dark { background: #1a1a2e; }
+  .qr-mock-cell.light { background: #fff; }
+
+  /* Special QR pattern cells */
+  .qr-pattern {
+    width: 90px; height: 90px;
+    background: #fff;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #1a1a2e;
+  }
+
+  .qr-inner-pattern {
+    position: absolute;
+    inset: 4px;
+    background: repeating-conic-gradient(#1a1a2e 0% 25%, white 0% 50%) 0 0 / 8px 8px;
+    opacity: 0.9;
+  }
+
+  .qr-corner {
+    position: absolute;
+    width: 22px; height: 22px;
+    border: 3px solid #fff;
+    background: #1a1a2e;
+  }
+
+  .qr-c1 { top: 4px; left: 4px; }
+  .qr-c2 { top: 4px; right: 4px; }
+  .qr-c3 { bottom: 4px; left: 4px; }
+
+  .qr-hint {
+    text-align: center;
+    font-size: 10px;
+    color: #bbb;
+  }
+
+  /* Bottom tab */
+  .bottom-tab {
+    height: 60px;
+    background: #fff;
+    border-top: 1px solid #ebebeb;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 -1px 0 rgba(0,0,0,0.06);
+  }
+
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding-top: 8px;
+  }
+
+  .tab-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .tab-text {
+    font-size: 10px;
+    color: #bbb;
+    font-weight: 500;
+  }
+
+  .tab-item.active .tab-text { color: #E63946; }
+  .tab-item.active .tab-icon { filter: none; }
+
+  /* ======= PAGE 2: 检票 ======= */
+
+  .checkin-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f7;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .scan-btn-outer {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E63946, #c1121f);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 0 0 12px rgba(230,57,70,0.08),
+      0 0 0 24px rgba(230,57,70,0.04),
+      0 16px 40px rgba(230,57,70,0.4);
+  }
+
+  .scan-btn-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .scan-icon {
+    font-size: 40px;
+    line-height: 1;
+  }
+
+  .scan-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+
+  .scan-hint {
+    font-size: 12px;
+    color: #999;
+    letter-spacing: 0.5px;
+  }
+
+  /* Result modal overlay */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: flex-end;
+    z-index: 50;
+  }
+
+  .result-sheet {
+    width: 100%;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 28px;
+  }
+
+  .sheet-handle {
+    width: 36px; height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+
+  .result-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .status-icon-big {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .status-icon-big.success { background: #e8f8f0; }
+  .status-icon-big.fail { background: #fef0f0; }
+
+  .result-title {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .result-title.success { color: #2ecc71; }
+  .result-title.fail { color: #e74c3c; }
+
+  .result-details {
+    background: #f8f8f8;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 4px 0;
+  }
+
+  .detail-key { color: #999; }
+  .detail-val { color: #1a1a2e; font-weight: 500; }
+
+  .btn-confirm {
+    width: 100%;
+    height: 46px;
+    background: linear-gradient(135deg, #E63946, #c1121f);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(230,57,70,0.35);
+  }
+
+  /* ======= PAGE 3: 个人 ======= */
+
+  .profile-hero {
+    background: linear-gradient(160deg, #1a1a2e 0%, #2d2d44 100%);
+    padding: 24px 20px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E63946, #c1121f);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    border: 2px solid rgba(255,255,255,0.15);
+  }
+
+  .profile-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .role-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(230,57,70,0.2);
+    color: #E63946;
+    border: 1px solid rgba(230,57,70,0.3);
+  }
+
+  .stats-row {
+    display: flex;
+    margin: 0 16px;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: -16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1;
+  }
+
+  .stat-item {
+    flex: 1;
+    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stat-item + .stat-item {
+    border-left: 1px solid #f0f0f0;
+  }
+
+  .stat-num {
+    font-size: 24px;
+    font-weight: 700;
+    color: #E63946;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: #999;
+    font-weight: 500;
+  }
+
+  .menu-section {
+    margin: 16px 16px 0;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 12px;
+    border-bottom: 1px solid #f5f5f5;
+  }
+
+  .menu-item:last-child { border-bottom: none; }
+
+  .menu-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .menu-icon.red { background: #fef0f0; }
+  .menu-icon.gray { background: #f5f5f7; }
+
+  .menu-text {
+    flex: 1;
+    font-size: 14px;
+    color: #1a1a2e;
+    font-weight: 500;
+  }
+
+  .menu-arrow {
+    color: #ccc;
+    font-size: 12px;
+  }
+
+  /* Page tag for sections */
+  .section-tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #333;
+    background: #1e1e28;
+    border: 1px solid #2a2a38;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+</style>
+</head>
+<body>
+
+<h1 class="page-title">Cinema Ticket System · Prototype</h1>
+
+<div class="screens-row">
+
+  <!-- ===== SCREEN 1: 出票 ===== -->
+  <div class="screen-wrapper">
+    <div class="section-tag">Tab 01</div>
+    <div class="screen-label">出票页面</div>
+    <div class="phone">
+      <div class="phone-screen">
+
+        <!-- Status bar -->
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <span>●●●</span>
+            <span>WiFi</span>
+            <span>🔋</span>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <div class="nav-bar">
+          <span class="nav-left">管理电影</span>
+          <span class="nav-title">出票</span>
+          <span class="nav-right">历史</span>
+        </div>
+
+        <!-- Form -->
+        <div class="scroll-content">
+          <div class="form-section">
+            <div class="form-group">
+              <label class="form-label">选择电影</label>
+              <div class="form-input picker has-value">
+                <span>《周处除三害》</span>
+                <span class="picker-arrow">▼</span>
+              </div>
+              <div style="margin-top:4px; font-size:10px; color:#bbb; padding-left:4px;">有效期：03/01 — 03/22</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">学生手机号</label>
+              <div class="form-input has-value">
+                <span>138****8888</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">购票张数</label>
+              <div class="form-input has-value">
+                <span>2 张</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-primary">生 成 二 维 码</div>
+
+          <!-- QR result -->
+          <div class="qr-success">
+            <div class="qr-success-header">
+              <div class="success-dot"></div>
+              <span class="success-text">出票成功</span>
+            </div>
+
+            <div class="ticket-info">
+              <div class="ticket-info-row">
+                <span class="info-key">电影</span>
+                <span class="info-val">《周处除三害》</span>
+              </div>
+              <div class="ticket-info-row">
+                <span class="info-key">手机</span>
+                <span class="info-val">138****8888</span>
+              </div>
+              <div class="ticket-info-row">
+                <span class="info-key">张数</span>
+                <span class="info-val">2 张</span>
+              </div>
+              <div class="ticket-info-row">
+                <span class="info-key">有效期至</span>
+                <span class="info-val">2024-03-22</span>
+              </div>
+            </div>
+
+            <div class="qr-image-area">
+              <div class="qr-pattern">
+                <div class="qr-inner-pattern"></div>
+                <div class="qr-corner qr-c1"></div>
+                <div class="qr-corner qr-c2"></div>
+                <div class="qr-corner qr-c3"></div>
+              </div>
+            </div>
+
+            <div class="qr-hint">长按图片可保存或转发</div>
+          </div>
+
+          <div style="margin: 10px 16px; height: 38px; border-radius: 10px; border: 1.5px solid #E63946; display:flex;align-items:center;justify-content:center;font-size:13px;color:#E63946;font-weight:500;letter-spacing:1px;">继续出票（清空表单）</div>
+        </div>
+
+        <!-- Bottom Tab -->
+        <div class="bottom-tab">
+          <div class="tab-item active">
+            <span class="tab-icon">🎫</span>
+            <span class="tab-text" style="color:#E63946;">出票</span>
+          </div>
+          <div class="tab-item">
+            <span class="tab-icon">📷</span>
+            <span class="tab-text">检票</span>
+          </div>
+          <div class="tab-item">
+            <span class="tab-icon">👤</span>
+            <span class="tab-text">个人</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 2: 检票 ===== -->
+  <div class="screen-wrapper">
+    <div class="section-tag">Tab 02</div>
+    <div class="screen-label">检票页面</div>
+    <div class="phone">
+      <div class="phone-screen">
+
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <span>●●●</span>
+            <span>WiFi</span>
+            <span>🔋</span>
+          </div>
+        </div>
+
+        <div class="nav-bar">
+          <span class="nav-left"></span>
+          <span class="nav-title">检票</span>
+          <span class="nav-right">历史</span>
+        </div>
+
+        <div class="checkin-body">
+          <div class="scan-btn-outer">
+            <div class="scan-btn-inner">
+              <span class="scan-icon">📷</span>
+              <span class="scan-label">开始检票</span>
+            </div>
+          </div>
+          <div class="scan-hint">点击按钮扫描学生二维码</div>
+        </div>
+
+        <!-- Modal overlay: 核销成功 -->
+        <div class="modal-overlay">
+          <div class="result-sheet">
+            <div class="sheet-handle"></div>
+
+            <div class="result-status">
+              <div class="status-icon-big success">✅</div>
+              <span class="result-title success">核销成功</span>
+            </div>
+
+            <div class="result-details">
+              <div class="detail-row">
+                <span class="detail-key">电影</span>
+                <span class="detail-val">《周处除三害》</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-key">手机</span>
+                <span class="detail-val">138****8888</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-key">张数</span>
+                <span class="detail-val">2 张</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-key">出票时间</span>
+                <span class="detail-val">03-15 14:32</span>
+              </div>
+            </div>
+
+            <div class="btn-confirm">确 认</div>
+          </div>
+        </div>
+
+        <div class="bottom-tab">
+          <div class="tab-item">
+            <span class="tab-icon">🎫</span>
+            <span class="tab-text">出票</span>
+          </div>
+          <div class="tab-item active">
+            <span class="tab-icon">📷</span>
+            <span class="tab-text" style="color:#E63946;">检票</span>
+          </div>
+          <div class="tab-item">
+            <span class="tab-icon">👤</span>
+            <span class="tab-text">个人</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 3: 个人 ===== -->
+  <div class="screen-wrapper">
+    <div class="section-tag">Tab 03</div>
+    <div class="screen-label">个人页面</div>
+    <div class="phone">
+      <div class="phone-screen">
+
+        <div class="status-bar" style="background: #1a1a2e;">
+          <span class="status-time" style="color:#fff;">9:41</span>
+          <div class="status-icons">
+            <span style="color:#fff;">●●●</span>
+            <span style="color:#fff;">WiFi</span>
+            <span style="color:#fff;">🔋</span>
+          </div>
+        </div>
+
+        <div class="nav-bar" style="background:#1a1a2e; border-bottom:1px solid #2a2a3e;">
+          <span class="nav-left" style="color:transparent;">-</span>
+          <span class="nav-title" style="color:#fff;">个人</span>
+          <span class="nav-right" style="color:transparent;">-</span>
+        </div>
+
+        <div class="scroll-content" style="background:#f5f5f7;">
+
+          <!-- Profile hero -->
+          <div class="profile-hero">
+            <div class="avatar">👤</div>
+            <div class="profile-name">张三</div>
+            <div class="role-badge">管 理 员</div>
+          </div>
+
+          <!-- Stats -->
+          <div class="stats-row">
+            <div class="stat-item">
+              <div class="stat-num">12</div>
+              <div class="stat-label">今日出票（张）</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-num">8</div>
+              <div class="stat-label">今日核销（张）</div>
+            </div>
+          </div>
+
+          <!-- Menu -->
+          <div class="menu-section">
+            <div class="menu-item">
+              <div class="menu-icon red">🔑</div>
+              <span class="menu-text">修改密码</span>
+              <span class="menu-arrow">›</span>
+            </div>
+            <div class="menu-item">
+              <div class="menu-icon gray">🚪</div>
+              <span class="menu-text" style="color:#e74c3c;">退出登录</span>
+              <span class="menu-arrow">›</span>
+            </div>
+          </div>
+
+          <!-- Version -->
+          <div style="text-align:center; margin-top:24px; font-size:11px; color:#ccc;">
+            内部系统 · 仅限工作人员使用
+          </div>
+
+        </div>
+
+        <div class="bottom-tab">
+          <div class="tab-item">
+            <span class="tab-icon">🎫</span>
+            <span class="tab-text">出票</span>
+          </div>
+          <div class="tab-item">
+            <span class="tab-icon">📷</span>
+            <span class="tab-text">检票</span>
+          </div>
+          <div class="tab-item active">
+            <span class="tab-icon">👤</span>
+            <span class="tab-text" style="color:#E63946;">个人</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
